@@ -30,7 +30,7 @@ image-heavy pages, zero-overfull discipline.
 ## Quick start / 快速上手
 
 ```bash
-git clone https://github.com/<you>/beamertheme-shanghai.git
+git clone https://github.com/Hanlin-Dong/beamertheme-shanghai.git
 cd beamertheme-shanghai/example
 latexmk -g -xelatex -interaction=nonstopmode example-shanghai.tex
 ```
