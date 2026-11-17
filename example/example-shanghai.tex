@@ -1,0 +1,273 @@
+% !TEX program = xelatex
+% =========================================================================
+% 上海 · 城市导读 —— beamerthemeShanghai 示例文稿
+% -------------------------------------------------------------------------
+% 演示内容：封面 / 章节目录页 / 正文页 / 强调框页 / 三图横排页 / 双栏页 / 结束页
+% 演示选项：换字体（font=sans / font=kai）与换导航（splitnavigation=true）
+%   把下面 \usetheme 一行换成注释中的任意一种即可，重新编译两遍。
+%
+% 编译：latexmk -g -xelatex -interaction=nonstopmode example-shanghai.tex
+% =========================================================================
+\documentclass[aspectratio=169,11pt]{ctexbeamer}
+
+% —— 主题与字体（四选一，去掉注释即可切换）——
+\usetheme{Shanghai}                              % 默认：思源宋体 + 左右分栏导航
+% \usetheme[font=sans]{Shanghai}                 % 思源黑体
+% \usetheme[font=kai]{Shanghai}                  % 楷体
+% \usetheme[font=none]{Shanghai}                 % 完全交给 ctex 默认字体
+% \usetheme[splitnavigation=true]{Shanghai}      % section 与 subsection 分两行
+
+\usepackage{tikz}
+
+\definecolor{ShanghaiBlue}{RGB}{51,51,178}
+\definecolor{ShanghaiInk}{RGB}{22,32,58}
+
+\title[魔都上海]{魔都上海：一座城市的横剖面}
+\subtitle{城市导读}
+\author[H. Dong]{Hanlin Dong}
+\institute[Shanghai Theme]{beamerthemeShanghai 示例}
+\date{2026.11}
+
+% 关键数字强调：加粗 + 主题蓝
+\newcommand{\EmphNum}[1]{\textbf{\textcolor{ShanghaiBlue}{#1}}}
+% 无框分组小标题：主要内容的默认形态
+\newcommand{\PlainHeading}[1]{\par\medskip\textbf{#1}\par}
+% 章节分隔页
+\newcommand{\SectionDivider}[2]{%
+  \usebackgroundtemplate{\usebeamercolor[bg]{frametitle}\rule{\paperwidth}{\paperheight}}%
+  \begin{frame}
+    \setlength{\parindent}{0pt}\raggedright
+    \usebeamercolor[fg]{frametitle}%
+    \vfill
+    {\color{fg}\fontsize{16}{20}\selectfont\bfseries 0#1}\par
+    \vspace{12pt}
+    {\color{fg}\fontsize{30}{36}\selectfont\bfseries #2}\par
+    \vspace{15.2pt}
+    {\color{fg!45!bg}\rule{4.6cm}{0.5pt}}\par
+    \vspace{-8.2pt}
+    \setbeamertemplate{section in toc}{}%
+    \setbeamertemplate{subsection in toc}{%
+      \ifnum\inserttocsubsectionnumber>1\relax
+        \hspace{0.85em}{\color{fg!45!bg}\textbar}\hspace{0.85em}%
+      \fi
+      {\normalsize\color{fg}\inserttocsubsection}}%
+    \tableofcontents[sections={\thesection}]%
+    \vfill
+  \end{frame}%
+  \usebackgroundtemplate{}%
+}
+% 照片占位（替换为 \includegraphics[width=\dimexpr\linewidth-0.9pt\relax]{...}）
+\newcommand{\PhotoPlaceholder}[1]{%
+  {\setlength{\fboxsep}{0pt}%
+   \fcolorbox{black!25}{black!12}{\textcolor{black!30}{\rule{\dimexpr\linewidth-0.9pt\relax}{#1}}}}}
+\newcommand{\PhotoCaption}[1]{\par{\tiny\bfseries\color{black!65}#1\par}}
+
+\begin{document}
+
+% ---------- 封面 ----------
+\begin{frame}
+  \titlepage
+\end{frame}
+
+% ================================================================
+\section{城市概况}
+\subsection{地理与人口}
+\subsection{经济与交通}
+\SectionDivider{1}{城市概况}
+
+% ---------- 正文型页面：无框小标题 + 条目 ----------
+\begin{frame}{1.1 地理与人口}
+  \PlainHeading{长江三角洲的龙头}
+  \begin{itemize}
+    \item 地处长江入海口，东临东海，黄浦江穿城而过
+    \item 全市面积约 \EmphNum{6340.5} 平方千米，辖 \EmphNum{16} 个区
+    \item 常住人口约 \EmphNum{2487} 万（2020 年第七次全国人口普查）
+  \end{itemize}
+
+  \PlainHeading{平原水乡}
+  \begin{itemize}
+    \item 平均海拔 \EmphNum{4} 米左右，大金山岛为全市最高点
+    \item 淀山湖、崇明岛构成西部的湖群与沙岛景观
+  \end{itemize}
+\end{frame}
+
+% ---------- 强调框页：重点数据用 block ----------
+\begin{frame}{1.2 经济与交通}
+  \begin{block}{经济总量}
+    2024 年地区生产总值约 \EmphNum{5.39} 万亿元，是我国最大的经济中心城市之一；
+    港口集装箱吞吐量连续多年居世界第一。
+  \end{block}
+
+  \PlainHeading{轨道交通}
+  \begin{itemize}
+    \item 运营里程超过 \EmphNum{800} 千米，线网规模居世界前列
+    \item 日常工作日客流逾 \EmphNum{1000} 万人次
+  \end{itemize}
+
+  \PlainHeading{航空枢纽}
+  浦东、虹桥两大国际机场，通航全球 \EmphNum{300} 多个城市。
+\end{frame}
+
+% ================================================================
+\section{历史文脉}
+\subsection{从渔村到开埠}
+\subsection{海派文化}
+\SectionDivider{2}{历史文脉}
+
+\begin{frame}{2.1 从渔村到开埠}
+  \PlainHeading{古代：青龙镇与上海滩}
+  \begin{itemize}
+    \item 唐宋时期青龙镇已是江南贸易港口
+    \item 元至元二十九年（\EmphNum{1292}）设上海县
+  \end{itemize}
+
+  \PlainHeading{近代：开埠与工商都会}
+  \begin{itemize}
+    \item \EmphNum{1843} 年开埠，租界时期形成外滩建筑群
+    \item 民族工业、报馆、大学在此聚集，孕育现代都市文明
+  \end{itemize}
+
+  \PlainHeading{现代：改革开放前沿}
+  \begin{itemize}
+    \item \EmphNum{1990} 年浦东开发开放，陆家嘴从阡陌农田变身金融城
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{2.2 海派文化}
+  \begin{block}{城市精神}
+    海纳百川，追求卓越；开明睿智，大气谦和。
+  \end{block}
+
+  \PlainHeading{文化切片}
+  \begin{itemize}
+    \item 石库门：中西合璧的里弄住宅，中共一大会址所在（\EmphNum{1921}）
+    \item 沪剧、评弹、滑稽戏：从市井生长出来的舞台艺术
+    \item 梧桐区：衡复风貌区的花园洋房与咖啡馆
+  \end{itemize}
+\end{frame}
+
+% ================================================================
+\section{城市地标}
+\subsection{陆家嘴天际线}
+\subsection{豫园与老城厢}
+\SectionDivider{3}{城市地标}
+
+% ---------- 三图横排：TikZ 画"三件套"高度对比 ----------
+\begin{frame}[t]{3.1 陆家嘴天际线}
+  \vspace{-2pt}
+  \PlainHeading{摩天楼"三件套"（高度按比例）}
+  \vspace{2pt}
+  \centering
+  \parbox[t]{0.315\textwidth}{\centering
+    \begin{tikzpicture}[scale=0.6]
+      \fill[ShanghaiInk!80] (0,0) rectangle (1.6,3.79);
+      \draw[white!70] (0.2,0.5) -- (1.4,0.5) (0.2,1.3) -- (1.4,1.3)
+        (0.2,2.1) -- (1.4,2.1) (0.2,2.9) -- (1.4,2.9);
+      \fill[ShanghaiBlue] (0.55,3.79) rectangle (1.05,4.15);
+    \end{tikzpicture}\\[1pt]
+    \PhotoCaption{上海中心大厦 632 m}}\hfill
+  \parbox[t]{0.315\textwidth}{\centering
+    \begin{tikzpicture}[scale=0.6]
+      \fill[ShanghaiInk!60] (0,0) rectangle (1.6,2.95);
+      \draw[white!70] (0.2,0.5) -- (1.4,0.5) (0.2,1.2) -- (1.4,1.2)
+        (0.2,1.9) -- (1.4,1.9) (0.2,2.6) -- (1.4,2.6);
+    \end{tikzpicture}\\[1pt]
+    \PhotoCaption{环球金融中心 492 m}}\hfill
+  \parbox[t]{0.315\textwidth}{\centering
+    \begin{tikzpicture}[scale=0.6]
+      \fill[ShanghaiInk!40] (0,0) rectangle (1.6,2.52);
+      \draw[white!70] (0.2,0.4) -- (1.4,0.4) (0.2,1.1) -- (1.4,1.1)
+        (0.2,1.8) -- (1.4,1.8);
+      \fill[ShanghaiBlue] (0.65,2.52) -- (0.8,2.85) -- (0.95,2.52) -- cycle;
+    \end{tikzpicture}\\[1pt]
+    \PhotoCaption{金茂大厦 420.5 m}}\par
+  \vspace{4pt}
+  {\small 与外滩万国建筑博览群隔江相望，共同构成上海的经典天际线。\par}
+\end{frame}
+
+\begin{frame}[t]{3.2 豫园与老城厢}
+  \begin{columns}[T]
+    \begin{column}{0.54\textwidth}
+      \PlainHeading{江南园林}
+      \begin{itemize}\setlength{\itemsep}{0pt}
+        \item 始建于明嘉靖年间（\EmphNum{1559}），潘允端私园
+        \item 玉玲珑：太湖石"皱瘦漏透"之冠
+      \end{itemize}
+      \PlainHeading{老城厢}
+      \begin{itemize}\setlength{\itemsep}{0pt}
+        \item 城隍庙与九曲桥：年味最浓的市中心
+        \item 城墙遗址与大境阁：六百年县城的记忆
+      \end{itemize}
+    \end{column}
+    \begin{column}{0.42\textwidth}
+      \centering
+      \PhotoPlaceholder{4.6cm}\\[1pt]
+      \PhotoCaption{豫园九曲桥（占位图）}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+% ================================================================
+\section{生活上海}
+\subsection{本帮美食}
+\subsection{城市漫步}
+\SectionDivider{4}{生活上海}
+
+\begin{frame}{4.1 本帮美食}
+  \PlainHeading{浓油赤酱}
+  \begin{itemize}
+    \item 红烧肉、草头圈子、油爆虾：本帮菜的看家菜
+    \item 腌笃鲜：春笋、咸肉与鲜肉的时令合奏
+  \end{itemize}
+
+  \PlainHeading{街头点心}
+  \begin{itemize}
+    \item 小笼包：皮薄汁多，"轻轻提，慢慢移"
+    \item 生煎馒头：底脆汁丰，撒一把葱花芝麻
+    \item 葱油拌面、排骨年糕：弄堂里的老味道
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[t]{4.2 城市漫步}
+  \begin{columns}[T]
+    \begin{column}{0.54\textwidth}
+      \PlainHeading{经典路线}
+      \begin{itemize}\setlength{\itemsep}{0pt}
+        \item 外滩 \EmphNum{$\to$} 苏州河 \EmphNum{$\to$} 四行仓库
+        \item 武康路 \EmphNum{$\to$} 安福路 \EmphNum{$\to$} 五原路
+        \item 豫园 \EmphNum{$\to$} 城隍庙 \EmphNum{$\to$} 十六铺
+      \end{itemize}
+      \PlainHeading{建议}
+      清晨看外滩人少光好；黄昏登陆家嘴看华灯初上。
+    \end{column}
+    \begin{column}{0.42\textwidth}
+      \centering
+      \PhotoPlaceholder{4.6cm}\\[1pt]
+      \PhotoCaption{武康路街景（占位图）}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+% ---------- 结束页 ----------
+\begingroup
+\setbeamertemplate{footline}{}
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{section in head/foot}{\color{fg!50!bg}\insertsectionhead}
+\setbeamertemplate{subsection in head/foot}{}
+\begin{frame}
+  \centering
+  \vspace{0.7cm}
+  {\fontsize{23}{28}\selectfont\bfseries\color{ShanghaiBlue}谢谢观赏\par}
+  \vspace{20pt}
+  {\color{ShanghaiBlue}\rule{9cm}{0.9pt}\par}
+  \vspace{22pt}
+  {\fontsize{18}{24}\selectfont\color{ShanghaiInk}魔都上海：一座城市的横剖面\par}
+  \vspace{10pt}
+  {\large 城市导读\par}
+  {\fontsize{10.5}{14}\selectfont Hanlin Dong\par}
+  {\fontsize{10.5}{14}\selectfont beamerthemeShanghai 示例\par}
+  {\fontsize{10.5}{14}\selectfont 2026.11\par}
+\end{frame}
+\endgroup
+
+\end{document}

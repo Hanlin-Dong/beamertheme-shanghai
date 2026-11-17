@@ -1,0 +1,398 @@
+% =========================================================================
+% Shanghai — a clean Beamer theme for Chinese academic presentations
+% -------------------------------------------------------------------------
+% Version : 2.0 (2026-11-17)
+% Author  : Hanlin Dong <hanlin.dong@shnu.edu.cn>
+% License : MIT
+%
+% A Beijing-"split"-derived theme tuned for dense, image-heavy Chinese
+% decks: equal-width, centered navigation cells, no mini-frame circles,
+% padded rounded blocks, and a Madrid-style three-part footline.
+%
+% Usage
+%   \usetheme{Shanghai}                          % default: serif + inline nav
+%   \usetheme[font=sans]{Shanghai}               % 黑体 as the main family
+%   \usetheme[font=kai]{Shanghai}                % 楷体 as the main family
+%   \usetheme[font=none]{Shanghai}               % don't touch fonts at all
+%   \usetheme[splitnavigation=true]{Shanghai}    % section / subsection rows
+%                                                % on two separate lines
+%
+% Font fallback
+%   Each family is a fallback chain; the first font installed on the machine
+%   wins, and the chain ends with the Fandol fonts bundled with TeX Live, so
+%   the theme always compiles out of the box:
+%     serif : Source Han Serif SC -> Noto Serif CJK SC -> Songti SC
+%             -> STSong -> SimSun -> FandolSong (TeX Live)
+%     sans  : Source Han Sans SC -> Noto Sans CJK SC -> PingFang SC
+%             -> Hiragino Sans GB -> Microsoft YaHei -> SimHei
+%             -> FandolHei (TeX Live)
+%     kai   : Kaiti SC -> STKaiti -> KaiTi -> 楷体
+%             -> AR PL UKai CN -> LXGW WenKai -> FandolKai (TeX Live)
+%   Fonts can be switched at any point of the preamble with
+%     \ShanghaiFontFamily{serif|sans|kai}
+%   or overridden entirely by calling \setmainfont / \setCJKmainfont after
+%   loading the theme (or by using font=none).
+% =========================================================================
+\mode<presentation>
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{beamerthemeShanghai}[2026/11/17 v2.0 Shanghai Beamer theme]
+
+% -------------------------------------------------------------------------
+% Options
+% -------------------------------------------------------------------------
+\newif\ifShanghaisplitnavigation
+\Shanghaisplitnavigationfalse
+
+% Navigation: inline (sections left / subsections right, default) or split
+% (two full-width rows).
+\DeclareOptionBeamer{splitnavigation}[true]{%
+  \csname Shanghaisplitnavigation#1\endcsname}
+
+% Main font family: serif (default) | sans | kai | none.
+\def\Shanghai@fontchoice{serif}
+\DeclareOptionBeamer{font}[serif]{\def\Shanghai@fontchoice{#1}}
+
+\ProcessOptionsBeamer
+
+% -------------------------------------------------------------------------
+% Fonts
+% -------------------------------------------------------------------------
+\RequirePackage{fontspec}
+
+% Walk a comma-separated font list and store the first existing name in
+% \Shanghai@fontname. The list always ends with a TeX Live bundled font, so
+% the last name is used verbatim if nothing else exists.
+\def\Shanghai@pickfont#1{%
+  \edef\Shanghai@pickedlist{#1}%
+  \expandafter\Shanghai@pickdo\Shanghai@pickedlist,\@nil}
+\def\Shanghai@pickdo#1,#2\@nil{%
+  \IfFontExistsTF{#1}%
+    {\def\Shanghai@fontname{#1}}%
+    {\def\Shanghai@rest{#2}%
+     \ifx\Shanghai@rest\@empty
+       \def\Shanghai@fontname{#1}% nothing matched: fail loudly downstream
+     \else
+       \Shanghai@pickdo#2\@nil
+     \fi}}
+
+\def\Shanghai@seriflist{Source Han Serif SC,Noto Serif CJK SC,Songti SC,STSong,SimSun,FandolSong-Regular.otf}
+\def\Shanghai@sanslist{Source Han Sans SC,Noto Sans CJK SC,PingFang SC,Hiragino Sans GB,Microsoft YaHei,SimHei,FandolHei-Regular.otf}
+\def\Shanghai@kailist{Kaiti SC,STKaiti,KaiTi,楷体,AR PL UKai CN,LXGW WenKai,FandolKai-Regular.otf}
+
+% Apply a family to all text roles. Kaiti families usually ship without a
+% bold cut, so fake bold is enabled for the kai family only.
+\def\Shanghai@applyfont#1{%
+  \Shanghai@pickfont{#1}%
+  \expandafter\setmainfont\expandafter{\Shanghai@fontname}%
+  \expandafter\setsansfont\expandafter{\Shanghai@fontname}%
+  \@ifpackageloaded{xeCJK}{%
+    \expandafter\setCJKmainfont\expandafter{\Shanghai@fontname}%
+    \expandafter\setCJKsansfont\expandafter{\Shanghai@fontname}%
+  }{}%
+}
+
+% Public switch, usable after \usetheme{Shanghai}: \ShanghaiFontFamily{kai}
+% Kaiti families usually ship without a bold cut, so fake bold is enabled.
+\def\Shanghai@applyfontkai#1{%
+  \Shanghai@pickfont{#1}%
+  \expandafter\setmainfont\expandafter{\Shanghai@fontname}[AutoFakeBold=3]%
+  \expandafter\setsansfont\expandafter{\Shanghai@fontname}[AutoFakeBold=3]%
+  \@ifpackageloaded{xeCJK}{%
+    \expandafter\setCJKmainfont\expandafter{\Shanghai@fontname}[AutoFakeBold=3]%
+    \expandafter\setCJKsansfont\expandafter{\Shanghai@fontname}[AutoFakeBold=3]%
+  }{}%
+}
+
+\def\Shanghai@str@serif{serif}
+\def\Shanghai@str@sans{sans}
+\def\Shanghai@str@kai{kai}
+\def\Shanghai@str@none{none}
+\newcommand{\ShanghaiFontFamily}[1]{%
+  \edef\Shanghai@tmp{#1}%
+  \ifx\Shanghai@tmp\Shanghai@str@serif
+    \Shanghai@applyfont\Shanghai@seriflist
+  \else\ifx\Shanghai@tmp\Shanghai@str@sans
+    \Shanghai@applyfont\Shanghai@sanslist
+  \else\ifx\Shanghai@tmp\Shanghai@str@kai
+    \Shanghai@applyfontkai\Shanghai@kailist
+  \else
+    \PackageWarning{beamerthemeShanghai}{Unknown font family `#1';\MessageBreak
+      expected serif, sans or kai -- keeping fonts untouched}%
+  \fi\fi\fi
+}
+
+% Resolve the theme option. font=none leaves every font untouched.
+\ifx\Shanghai@fontchoice\Shanghai@str@none\else
+  \ShanghaiFontFamily{\Shanghai@fontchoice}%
+\fi
+
+% -------------------------------------------------------------------------
+% Structure
+% -------------------------------------------------------------------------
+\useoutertheme{split}
+% The split outer theme right-aligns section names with \hfill. Shanghai
+% supplies its own fixed-width, centered cells, so remove that inherited glue.
+\setbeamertemplate{section in head/foot}{\insertsectionhead}
+\setbeamertemplate{section in head/foot shaded}{\color{fg!50!bg}\insertsectionhead}
+\useinnertheme{rounded}
+\usecolortheme{whale}
+\usecolortheme{orchid}
+\setbeamerfont{block title}{size={}}
+
+% Slightly increase the breathing room between text and rounded block edges.
+% The navigation headline and the frame's outer margins are untouched.
+\newdimen\Shanghai@blockinset
+\Shanghai@blockinset=0.20cm
+\newdimen\Shanghai@blockverticalinset
+\Shanghai@blockverticalinset=0pt
+\newdimen\Shanghai@blocktitleverticalinset
+\Shanghai@blocktitleverticalinset=1pt
+
+% Title and body share the same horizontal inset. The title gets a little
+% extra vertical breathing room without taking too much space from dense pages.
+\def\Shanghai@typesetblocktitle#1{%
+  \vskip\Shanghai@blocktitleverticalinset
+  \raggedright
+  \leftskip=\Shanghai@blockinset
+  \rightskip=\Shanghai@blockinset
+  \usebeamerfont*{#1}\insertblocktitle\par
+  \vskip\Shanghai@blocktitleverticalinset
+}
+
+\def\Shanghai@blockbodyinset{%
+  \raggedright
+  \leftskip=\Shanghai@blockinset
+  \rightskip=\Shanghai@blockinset
+  \vskip\Shanghai@blockverticalinset
+}
+
+\defbeamertemplate{block begin}{shanghaipadded}[1][shadow=false]{%
+  \par\vskip\medskipamount
+  \begin{beamerboxesrounded}[upper=block title,lower=block body,#1]{%
+    \Shanghai@typesetblocktitle{block title}%
+  }%
+  \usebeamerfont{block body}%
+  \Shanghai@blockbodyinset
+}
+\defbeamertemplate{block end}{shanghaipadded}[1][]{%
+  \par\vskip\Shanghai@blockverticalinset
+  \end{beamerboxesrounded}\vskip\smallskipamount
+}
+
+\defbeamertemplate{block alerted begin}{shanghaipadded}[1][shadow=false]{%
+  \par\vskip\medskipamount
+  \begin{beamerboxesrounded}[upper=block title alerted,lower=block body alerted,#1]{%
+    \Shanghai@typesetblocktitle{block title alerted}%
+  }%
+  \usebeamerfont{block body alerted}%
+  \Shanghai@blockbodyinset
+}
+\defbeamertemplate{block alerted end}{shanghaipadded}[1][]{%
+  \par\vskip\Shanghai@blockverticalinset
+  \end{beamerboxesrounded}\vskip\smallskipamount
+}
+
+\defbeamertemplate{block example begin}{shanghaipadded}[1][shadow=false]{%
+  \par\vskip\medskipamount
+  \begin{beamerboxesrounded}[upper=block title example,lower=block body example,#1]{%
+    \Shanghai@typesetblocktitle{block title example}%
+  }%
+  \usebeamerfont{block body example}%
+  \Shanghai@blockbodyinset
+}
+\defbeamertemplate{block example end}{shanghaipadded}[1][]{%
+  \par\vskip\Shanghai@blockverticalinset
+  \end{beamerboxesrounded}\vskip\smallskipamount
+}
+
+\setbeamertemplate{block begin}[shanghaipadded]
+\setbeamertemplate{block end}[shanghaipadded]
+\setbeamertemplate{block alerted begin}[shanghaipadded]
+\setbeamertemplate{block alerted end}[shanghaipadded]
+\setbeamertemplate{block example begin}[shanghaipadded]
+\setbeamertemplate{block example end}[shanghaipadded]
+
+% Opt-in variant: a centered block title for a single callout card. The
+% default left-aligned title above stays in force everywhere else; enable
+% locally with \setbeamertemplate{block begin}[shanghaipaddedcenter].
+\def\Shanghai@typesetblocktitlecentered#1{%
+  \vskip\Shanghai@blocktitleverticalinset
+  \centering
+  \usebeamerfont*{#1}\insertblocktitle\par
+  \vskip\Shanghai@blocktitleverticalinset
+}
+
+\defbeamertemplate{block begin}{shanghaipaddedcenter}[1][shadow=false]{%
+  \par\vskip\medskipamount
+  \begin{beamerboxesrounded}[upper=block title,lower=block body,#1]{%
+    \Shanghai@typesetblocktitlecentered{block title}%
+  }%
+  \usebeamerfont{block body}%
+  \Shanghai@blockbodyinset
+}
+
+\newcount\Shanghai@navcount
+\newdimen\Shanghai@navwidth
+\newbox\Shanghai@navbox
+
+% Flush one accumulated navigation item into the horizontal row.
+\def\Shanghai@flushnavigation{%
+  \ifnum\Shanghai@navcount>0\relax\box\Shanghai@navbox\fi%
+  \setbox\Shanghai@navbox=\hbox{}%
+  \Shanghai@navcount=0\relax%
+}
+
+\def\Shanghai@sectionnavigation#1{%
+  \hbox to #1{%
+    \usebeamerfont{section in head/foot}%
+    \usebeamercolor[fg]{section in head/foot}%
+    \Shanghai@navcount=0\relax%
+    % Count section labels only; do not emit mini-frame dots between them.
+    \def\slideentry##1##2##3##4##5##6{}%
+    \def\sectionentry##1##2##3##4##5{\advance\Shanghai@navcount by1\relax}%
+    \dohead%
+    \ifnum\Shanghai@navcount<1\relax\Shanghai@navcount=1\relax\fi%
+    \Shanghai@navwidth=\dimexpr#1/\Shanghai@navcount\relax%
+    \Shanghai@navcount=0\relax%
+    \def\slideentry##1##2##3##4##5##6{}%
+    % Shanghai uses text links only, never mini-frame navigation circles.
+    \def\fakeslideentry##1##2##3##4##5##6{}%
+    \def\sectionentry##1##2##3##4##5{%
+      \Shanghai@flushnavigation%
+      \def\insertsectionhead{##2}%
+      \def\insertsectionheadnumber{##1}%
+      \def\insertpartheadnumber{##5}%
+      \setbox\Shanghai@navbox=\hbox{%
+        \hyperlink{Navigation##3}{\hbox to \Shanghai@navwidth{%
+          \hfil%
+          \ifnum\c@section=##1\relax%
+            \usebeamertemplate{section in head/foot}%
+          \else%
+            \usebeamertemplate{section in head/foot shaded}%
+          \fi%
+          \hfil%
+        }}%
+      }%
+      \ht\Shanghai@navbox=1.875ex\dp\Shanghai@navbox=0.75ex%
+      \Shanghai@navcount=1\relax%
+    }%
+    \dohead%
+    \Shanghai@flushnavigation%
+  }%
+}
+
+\def\Shanghai@subsectionnavigation#1{%
+  \hbox to #1{%
+    \usebeamerfont{subsection in head/foot}%
+    \usebeamercolor[fg]{subsection in head/foot}%
+    % First pass: count subsections belonging to the current section.
+    \beamer@currentsubsection=0\relax%
+    \Shanghai@navcount=0\relax%
+    \def\sectionentry##1##2##3##4##5{}%
+    \def\slideentry##1##2##3##4##5##6{%
+      \ifnum##6=\c@part\ifnum##1=\c@section%
+        \ifnum##2>\beamer@currentsubsection%
+          \beamer@currentsubsection=##2\relax%
+          \advance\Shanghai@navcount by1\relax%
+        \fi%
+      \fi\fi%
+    }%
+    \dohead%
+    % Second pass: lay out equal-width items across the full row.
+    \ifnum\Shanghai@navcount>0\relax%
+      \Shanghai@navwidth=\dimexpr#1/\Shanghai@navcount\relax%
+    \else%
+      \Shanghai@navwidth=#1\relax%
+    \fi%
+    \beamer@currentsubsection=0\relax%
+    \Shanghai@navcount=0\relax%
+    \def\slideentry##1##2##3##4##5##6{%
+      \ifnum##6=\c@part\ifnum##1=\c@section%
+        \ifnum##2>\beamer@currentsubsection%
+          \beamer@currentsubsection=##2\relax%
+          \Shanghai@flushnavigation%
+          \def\insertsubsectionhead{##5}%
+          \def\insertsectionheadnumber{##1}%
+          \def\insertsubsectionheadnumber{##2}%
+          \def\insertpartheadnumber{##6}%
+          \setbox\Shanghai@navbox=\hbox{%
+            \beamer@link(##4){\hbox to \Shanghai@navwidth{%
+              \hfil%
+              \ifnum\c@subsection=##2\relax%
+                \usebeamertemplate{subsection in head/foot}%
+              \else%
+                \usebeamertemplate{subsection in head/foot shaded}%
+              \fi%
+              \hfil%
+            }}%
+          }%
+          \ht\Shanghai@navbox=1.875ex\dp\Shanghai@navbox=0.75ex%
+          \Shanghai@navcount=1\relax%
+        \fi%
+      \fi\fi%
+    }%
+    \dohead%
+    \Shanghai@flushnavigation%
+  }%
+}
+
+% Navigation layout: left/right half-width columns by default; two separate
+% rows when splitnavigation=true. Keep symmetric safety insets and divide
+% only each box's usable width. The half-width columns use a slightly smaller
+% inset (0.2cm) than the full-width rows (0.3cm): with six subsections the
+% right-hand cells are narrow enough that a six-character label would
+% otherwise exceed its cell by about 1pt.
+\defbeamertemplate*{headline}{Shanghai theme}{%
+  \leavevmode%
+  \ifShanghaisplitnavigation%
+    \begin{beamercolorbox}[wd=\paperwidth,ht=2.5ex,dp=1.125ex,leftskip=0.3cm,rightskip=0.3cm]{section in head/foot}%
+      \Shanghai@sectionnavigation{\dimexpr\paperwidth-0.6cm\relax}%
+    \end{beamercolorbox}%
+    \par%
+    \begin{beamercolorbox}[wd=\paperwidth,ht=2.5ex,dp=1.125ex,leftskip=0.3cm,rightskip=0.3cm]{subsection in head/foot}%
+      \Shanghai@subsectionnavigation{\dimexpr\paperwidth-0.6cm\relax}%
+    \end{beamercolorbox}%
+  \else%
+    \hbox{%
+      \begin{beamercolorbox}[wd=.5\paperwidth,ht=2.5ex,dp=1.125ex,leftskip=0.2cm,rightskip=0.2cm]{section in head/foot}%
+        \Shanghai@sectionnavigation{\dimexpr.5\paperwidth-0.4cm\relax}%
+      \end{beamercolorbox}%
+      \begin{beamercolorbox}[wd=.5\paperwidth,ht=2.5ex,dp=1.125ex,leftskip=0.2cm,rightskip=0.2cm]{subsection in head/foot}%
+        \Shanghai@subsectionnavigation{\dimexpr.5\paperwidth-0.4cm\relax}%
+      \end{beamercolorbox}%
+    }%
+  \fi%
+}
+
+% Madrid-style three-part footline: author/institute, short title, date/page.
+\defbeamertemplate*{footline}{Shanghai theme}{%
+  \leavevmode%
+  \hbox{%
+    \begin{beamercolorbox}[wd=.333333\paperwidth,ht=2.25ex,dp=1ex,center]{author in head/foot}%
+      \usebeamerfont{author in head/foot}\insertshortauthor\expandafter\ifblank\expandafter{\beamer@shortinstitute}{}{~~(\insertshortinstitute)}%
+    \end{beamercolorbox}%
+    \begin{beamercolorbox}[wd=.333333\paperwidth,ht=2.25ex,dp=1ex,center]{title in head/foot}%
+      \usebeamerfont{title in head/foot}\insertshorttitle%
+    \end{beamercolorbox}%
+    \begin{beamercolorbox}[wd=.333333\paperwidth,ht=2.25ex,dp=1ex,leftskip=2ex,rightskip=2ex,sep=0pt]{date in head/foot}%
+      \hfill%
+      \usebeamerfont{date in head/foot}\insertshortdate{}%
+      \hfill%
+      \usebeamercolor[fg]{page number in head/foot}%
+      \usebeamerfont{page number in head/foot}%
+      \usebeamertemplate{page number in head/foot}%
+    \end{beamercolorbox}%
+  }%
+  \vskip0pt%
+}
+
+% Reapply the infolines color mapping after the document's color theme choice.
+\AtBeginDocument{%
+  \setbeamercolor*{author in head/foot}{parent=palette tertiary}%
+  \setbeamercolor*{title in head/foot}{parent=palette secondary}%
+  \setbeamercolor*{date in head/foot}{parent=palette primary}%
+  \setbeamertemplate{page number in head/foot}[totalframenumber]%
+}
+
+\mode<all>
