@@ -1,7 +1,7 @@
 % =========================================================================
 % Shanghai — a clean Beamer theme for Chinese academic presentations
 % -------------------------------------------------------------------------
-% Version : 2.0 (2026-11-17)
+% Version : 2.1 (2026-11-17)
 % Author  : Hanlin Dong <hanlin.dong@shnu.edu.cn>
 % License : MIT
 %
@@ -36,7 +36,7 @@
 \mode<presentation>
 
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{beamerthemeShanghai}[2026/11/17 v2.0 Shanghai Beamer theme]
+\ProvidesPackage{beamerthemeShanghai}[2026/11/17 v2.1 Shanghai Beamer theme]
 
 % -------------------------------------------------------------------------
 % Options
@@ -232,6 +232,57 @@
   \Shanghai@blockbodyinset
 }
 
+% -------------------------------------------------------------------------
+% Title page. Replaces the rounded inner theme's default so the spacing can
+% be tuned: more air between title and subtitle inside the blue title card,
+% and a tighter author / institute / date stack below it.
+% -------------------------------------------------------------------------
+\defbeamertemplate{title}{shanghai}{%
+  \begin{beamercolorbox}[sep=8pt,center,rounded=true]{title}
+    {\usebeamerfont{title}\linespread{1.3}\selectfont\inserttitle\par}%
+    \ifx\insertsubtitle\@empty%
+    \else%
+      \vskip0.9em%
+      {\usebeamerfont{subtitle}\usebeamercolor[fg]{subtitle}\insertsubtitle\par}%
+    \fi%
+  \end{beamercolorbox}%
+}
+\defbeamertemplate{author}{shanghai}{%
+  \begin{beamercolorbox}[sep=2pt,center]{author}%
+    \usebeamerfont{author}\insertauthor
+  \end{beamercolorbox}%
+}
+\defbeamertemplate{institute}{shanghai}{%
+  \begin{beamercolorbox}[sep=2pt,center]{institute}%
+    \usebeamerfont{institute}\insertinstitute
+  \end{beamercolorbox}%
+}
+\defbeamertemplate{date}{shanghai}{%
+  \begin{beamercolorbox}[sep=2pt,center]{date}%
+    \usebeamerfont{date}\insertdate
+  \end{beamercolorbox}%
+}
+\defbeamertemplate{title page}{shanghai}{%
+  \vbox{}
+  \vfill
+  \begingroup
+    \centering
+    \usebeamertemplate{title}
+    \vskip1em
+    \usebeamertemplate{author}
+    \usebeamertemplate{institute}
+    \usebeamertemplate{date}
+    \vskip0.5em
+    \usebeamertemplate{titlegraphic}
+  \endgroup
+  \vfill
+}
+\setbeamertemplate{title}[shanghai]
+\setbeamertemplate{author}[shanghai]
+\setbeamertemplate{institute}[shanghai]
+\setbeamertemplate{date}[shanghai]
+\setbeamertemplate{title page}[shanghai]
+
 \newcount\Shanghai@navcount
 \newdimen\Shanghai@navwidth
 \newbox\Shanghai@navbox
@@ -282,59 +333,92 @@
   }%
 }
 
+% The headcommand list mixes two entry kinds: \beamer@subsectionentry is
+% written by every \subsection declaration, \slideentry by every frame. Both
+% must count, otherwise a declared subsection without frames yet (e.g. on a
+% section divider page) would vanish from the bar. Keep the highest
+% subsection number seen and count each new number exactly once.
+\newcount\Shanghai@navlastsub
+
 \def\Shanghai@subsectionnavigation#1{%
   \hbox to #1{%
     \usebeamerfont{subsection in head/foot}%
     \usebeamercolor[fg]{subsection in head/foot}%
-    % First pass: count subsections belonging to the current section.
-    \beamer@currentsubsection=0\relax%
+    % ---- pass 1: count distinct subsections of the current section.
     \Shanghai@navcount=0\relax%
+    \Shanghai@navlastsub=0\relax%
     \def\sectionentry##1##2##3##4##5{}%
-    \def\slideentry##1##2##3##4##5##6{%
-      \ifnum##6=\c@part\ifnum##1=\c@section%
-        \ifnum##2>\beamer@currentsubsection%
-          \beamer@currentsubsection=##2\relax%
+    \def\fakeslideentry##1##2##3##4##5##6{}%
+    \def\beamer@subsectionentry##1##2##3##4##5{%
+      \ifnum##1=\c@part\ifnum##2=\c@section%
+        \ifnum##3>\Shanghai@navlastsub%
+          \Shanghai@navlastsub=##3\relax%
           \advance\Shanghai@navcount by1\relax%
         \fi%
-      \fi\fi%
-    }%
+      \fi\fi}%
+    \def\slideentry##1##2##3##4##5##6{%
+      \ifnum##6=\c@part\ifnum##1=\c@section%
+        \ifnum##2>\Shanghai@navlastsub%
+          \Shanghai@navlastsub=##2\relax%
+          \advance\Shanghai@navcount by1\relax%
+        \fi%
+      \fi\fi}%
     \dohead%
-    % Second pass: lay out equal-width items across the full row.
+    % ---- pass 2: lay out equal-width items across the full row.
     \ifnum\Shanghai@navcount>0\relax%
       \Shanghai@navwidth=\dimexpr#1/\Shanghai@navcount\relax%
     \else%
       \Shanghai@navwidth=#1\relax%
     \fi%
-    \beamer@currentsubsection=0\relax%
+    \Shanghai@navlastsub=0\relax%
     \Shanghai@navcount=0\relax%
+    \def\sectionentry##1##2##3##4##5{}%
+    \def\fakeslideentry##1##2##3##4##5##6{}%
+    \def\beamer@subsectionentry##1##2##3##4##5{%
+      \ifnum##1=\c@part\ifnum##2=\c@section%
+        \ifnum##3>\Shanghai@navlastsub%
+          \Shanghai@navlastsub=##3\relax%
+          \Shanghai@emitsubnav{##3}{0}{##4}{##5}%
+        \fi%
+      \fi\fi}%
     \def\slideentry##1##2##3##4##5##6{%
       \ifnum##6=\c@part\ifnum##1=\c@section%
-        \ifnum##2>\beamer@currentsubsection%
-          \beamer@currentsubsection=##2\relax%
-          \Shanghai@flushnavigation%
-          \def\insertsubsectionhead{##5}%
-          \def\insertsectionheadnumber{##1}%
-          \def\insertsubsectionheadnumber{##2}%
-          \def\insertpartheadnumber{##6}%
-          \setbox\Shanghai@navbox=\hbox{%
-            \beamer@link(##4){\hbox to \Shanghai@navwidth{%
-              \hfil%
-              \ifnum\c@subsection=##2\relax%
-                \usebeamertemplate{subsection in head/foot}%
-              \else%
-                \usebeamertemplate{subsection in head/foot shaded}%
-              \fi%
-              \hfil%
-            }}%
-          }%
-          \ht\Shanghai@navbox=1.875ex\dp\Shanghai@navbox=0.75ex%
-          \Shanghai@navcount=1\relax%
+        \ifnum##2>\Shanghai@navlastsub%
+          \Shanghai@navlastsub=##2\relax%
+          \Shanghai@emitsubnav{##2}{1}{##4}{##5}%
         \fi%
-      \fi\fi%
-    }%
+      \fi\fi}%
     \dohead%
     \Shanghai@flushnavigation%
   }%
+}
+
+% Emit one subsection navigation cell. #1 subsection number; #2 link kind
+% (0 = plain page number -> \hyperlink{Navigation#3}, as written by
+% \subsection declarations; 1 = "first/last" frame label -> \beamer@link(#3),
+% as written by frames); #3 link target; #4 subsection head text.
+\def\Shanghai@subnavcell#1{%
+  \hbox to \Shanghai@navwidth{%
+    \hfil%
+    \ifnum\c@subsection=#1\relax%
+      \usebeamertemplate{subsection in head/foot}%
+    \else%
+      \usebeamertemplate{subsection in head/foot shaded}%
+    \fi%
+    \hfil%
+  }%
+}
+\def\Shanghai@emitsubnav#1#2#3#4{%
+  \Shanghai@flushnavigation%
+  \def\insertsubsectionhead{#4}%
+  \def\insertsubsectionheadnumber{#1}%
+  \ifcase#2\relax%
+    \setbox\Shanghai@navbox=\hbox{\hyperlink{Navigation#3}{\Shanghai@subnavcell{#1}}}%
+  \or%
+    \setbox\Shanghai@navbox=\hbox{\beamer@link(#3){\Shanghai@subnavcell{#1}}}%
+  \fi%
+  \ht\Shanghai@navbox=1.875ex\dp\Shanghai@navbox=0.75ex%
+  \Shanghai@navcount=1\relax%
 }
 
 % Navigation layout: left/right half-width columns by default; two separate
